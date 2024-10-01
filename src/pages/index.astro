@@ -2,52 +2,10 @@
 import Layout from '../layouts/Layout.astro';
 ---
 <Layout title="CLCI Scanner - jsqr" description="Scanner for Chilean documents">
-	<h1 class="text-3xl font-bold text-center p-4">CLCI Scanner</h1>
 	<div class="w-full min-h-[100vh] flex justify-center flex-col items-center">
-		<div class="border border-emerald-900 mb-4 min-h-64 min-w-64">
-			<div id="reader" ></div>
-		</div>
-		<button class="p-4 border border-emerald-900 rounded-md" id="start-qr">Start QR Scanning</button>
-		<div id="result"></div>
+		<nav class="flex gap-2">
+			<a href="/jsqr" class="p-4 border border-emerald-900 rounded-md" id="start-qr">jsQr</a>
+			<a href="/html5qr" class="p-4 border border-emerald-900 rounded-md" id="start-qr">Html5QrCode</a>
+		</nav>
 	</div>
 </Layout>
-<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-
-<script>
-//const video = document.getElementById('video') as HTMLVideoElement;
-const resultDiv = document.getElementById('result');
-
-
-// @ts-ignore
-const html5QrCode = new Html5Qrcode("reader");
-
-function startQr() {
-	const qrCodeSuccessCallback = (decodedText: any, decodedResult: any) => {
-  	console.log("success")
-	console.log("decoded", decodedText)  /* handle success */
-	console.log("decoded result", decodedResult)  /* handle success */
-	const resultElement = document.getElementById("result");
-	if (resultElement) {
-		resultElement.innerText = `QR Code Result: ${decodedText}`;
-	}
-	html5QrCode.stop();
-};
-const qrCodeErrorCallback = (errorMessage: any) => {
-	// Handle error if needed
-	console.warn(`QR Code scanning error: ${errorMessage}`);
-};
-	html5QrCode.start(
-        { facingMode: "environment" }, // Use the rear camera
-        { fps: 60, qrbox: { width: 100, height: 100 }}, // FPS and QR box size
-        qrCodeSuccessCallback,
-        qrCodeErrorCallback
-    ).catch((err: any) => {
-        console.error(`Unable to start scanning: ${err}`);
-    });
-}
-
-const startQrButton = document.getElementById('start-qr');
-if (startQrButton) {
-	startQrButton.addEventListener('click', startQr);
-}
-</script>
