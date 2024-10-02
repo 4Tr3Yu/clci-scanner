@@ -42,11 +42,16 @@ import Layout from '../../layouts/Layout.astro';
 				containerElement.appendChild(valueElement);
 				resultDiv.appendChild(containerElement);
 				resultDiv.classList.remove('hidden');
+				video.classList.add('hidden');
 			}
 		}
 	}
 
 	async function startStream() {
+		if (resultDiv) {
+			resultDiv.innerHTML = '';
+		}
+		video.classList.remove('hidden');
 		const stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode: "environment" } });
 		video.srcObject = stream;
 		video.setAttribute("playsinline", "true");
