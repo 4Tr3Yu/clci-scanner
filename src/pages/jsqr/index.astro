@@ -3,14 +3,75 @@ import Layout from '../../layouts/Layout.astro';
 ---
 <Layout title="CLCI Scanner - jsqr" description="Scanner for Chilean documents">
 	<h2 class="text-3xl font-bold text-center p-4">jsQr</h2>
-	<div class="w-full min-h-[100vh] flex justify-center flex-col items-center">
+	<div class="w-full  flex justify-center flex-col items-center">
 		<div class="border border-emerald-900 mb-4 min-h-64 min-w-64">
-			<div id="reader" ></div>
+			<video id="video" class="w-auto h-auto" autoplay></video>
 		</div>
-		<button class="p-4 border border-emerald-900 rounded-md" id="start-qr">Start QR Scanning</button>
-		<div id="result"></div>
+			<canvas id="canvas" class="hidden"></canvas>
+		<button class="p-4 border border-emerald-900 rounded-md mb-4" id="start-qr">Start QR Scanning</button>
+		<div class="hidden text-center" id="result">
+
+		</div>
 	</div>
 </Layout>
+<script src="/jsQR.js" is:inline></script>
 <script>
+	const $ = (el: string) => document.querySelector(el); 
+	const startBtn = $('#start-qr');
+	const rut = $('#rut');
+	const serial = $('#serial');
+	const resultDiv = $('#result');
+	const video = $('#video') as HTMLVideoElement;
+	const canvas = $('#canvas') as HTMLCanvasElement;
+	const ctx = canvas.getContext('2d');
 
+
+	function handleResult(code: any) {
+	
+		if (resultDiv) {
+			const url = new URL(code.data);
+			const params = new URLSearchParams(url.search);
+			for (const [key, value] of params.entries()) {
+				const containerElement = document.createElement('p');
+				const keyElement = document.createElement('span');
+				const valueElement = document.createElement('span');
+				valueElement.classList.add('font-bold');
+				keyElement.innerText = key + ': ';
+				valueElement.innerText = value;
+				containerElement.appendChild(keyElement);
+				containerElement.appendChild(valueElement);
+				resultDiv.appendChild(containerElement);
+				resultDiv.classList.remove('hidden');
+			}
+		}
+	}
+
+	async function startStream() {
+		const stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode: "environment" } });
+		video.srcObject = stream;
+		video.setAttribute("playsinline", "true");
+		video.play();
+		requestAnimationFrame(tick);
+	}
+
+	function tick() {
+		if (video.readyState === video.HAVE_ENOUGH_DATA) {
+			canvas.height = video.videoHeight;
+			canvas.width = video.videoWidth;
+			ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+			const imgData = ctx?.getImageData(0, 0, canvas.width, canvas.height);
+			// @ts-ignore
+			const code = jsQR(imgData.data, imgData.width, imgData.height);
+			if (code && resultDiv) {
+				handleResult(code);
+				//resultDiv.innerText = `QR Code Result: ${code.data}`;
+				if (video.srcObject) {
+					(video.srcObject as MediaStream).getTracks().forEach(track => track.stop());
+				}
+			}
+		}
+		requestAnimationFrame(tick);
+	}
+
+	startBtn?.addEventListener('click', startStream);
 </script>
