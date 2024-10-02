@@ -6,7 +6,7 @@ import Whatsapp from "./icons/Whatsapp.astro";
 
 ---
 <footer class="bg-emerald-950 relative text-center text-emerald-300 py-3">
-	<div class="hex-container absolute -top-11 left-[50%] flex flex-wrap items-baseline gap-1">
+	<div class="hex-container absolute -top-9 left-[50%] flex flex-wrap items-baseline gap-1">
 		<Hexagon hexCalsses="bg-amber-400 w-12 h-12"  >
 			<a href="https://github.com/4Tr3Yu">
 				<Github/>
@@ -19,5 +19,11 @@ import Whatsapp from "./icons/Whatsapp.astro";
 		</Hexagon>
 	</div>
 
-	<p class="text-xs font-bold m-0">Made with 🖤 by <a href="https://atre.dev">Atre.dev</a></p>
+	<p class="text-xs m-0 letter tracking-wider">Made with 🖤 by <a class="font-bold underline" href="https://atre.dev">Atre.dev</a></p>
 </footer>
+<style scoped>
+	p {
+		font-family: "Raleway Variable", system-ui, sans-serif;
+		letter-spacing: 1px;
+	}
+</style>
