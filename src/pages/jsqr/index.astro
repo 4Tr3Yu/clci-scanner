@@ -27,8 +27,10 @@ import Layout from '../../layouts/Layout.astro';
 
 
 	function handleResult(code: any) {
-	
 		if (resultDiv) {
+			while (resultDiv.firstChild) {
+				resultDiv.removeChild(resultDiv.firstChild);
+			}
 			const url = new URL(code.data);
 			const params = new URLSearchParams(url.search);
 			for (const [key, value] of params.entries()) {
@@ -48,9 +50,6 @@ import Layout from '../../layouts/Layout.astro';
 	}
 
 	async function startStream() {
-		if (resultDiv) {
-			resultDiv.innerHTML = '';
-		}
 		video.classList.remove('hidden');
 		const stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode: "environment" } });
 		video.srcObject = stream;
