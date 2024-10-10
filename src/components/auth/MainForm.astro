@@ -1,0 +1,11 @@
+---
+interface Props {
+	action: string,
+	method: string
+}
+
+const { action, method } = Astro.props
+---
+<form class="border border-emerald-500 p-6 rounded-lg bg-gradient-to-tl from-black/25 to-transparent text-center max-w-md" action={action} method={method}>
+	<slot/>
+</form>

@@ -1,51 +1,72 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import Protected from '../../layouts/Protected.astro';
 ---
-<Layout title="CLCI Scanner - jsqr" description="Scanner for Chilean documents">
-	<h2 class="text-3xl font-bold text-center p-4">jsQr</h2>
-	<div class="w-full  flex justify-center flex-col items-center">
+<Protected title="CLCI Scanner - jsqr" description="Scanner for Chilean documents">
+	<div class="w-full  flex justify-center flex-col items-center pt-16">
 		<div class="border border-emerald-900 mb-4 min-h-64 min-w-64">
 			<video id="video" class="w-auto h-auto" autoplay></video>
 		</div>
 		<canvas id="canvas" class="hidden"></canvas>
-		<button class="p-4 border border-emerald-900 rounded-md mb-4" id="start-qr">Start QR Scanning</button>
+		<button type="button"  class="text-emerald-500 px-4 py-2 border border-emerald-500 bg-emerald-950/75 rounded-full mb-4 hover:scale-105 duration-300 ease-in-out" id="start-qr">Start Scanning</button>
 		<div class="hidden text-center" id="result">
 
 		</div>
 	</div>
-</Layout>
+</Protected>
 <script src="/jsQR.js" is:inline></script>
 <script>
+	import type { ScanResult } from "../../lib/types";
+	import { saveLog } from "../../lib/visitor-logs";
+	import { decodeUrl } from "../../lib/scanner";
+	
 	const $ = (el: string) => document.querySelector(el); 
+
 	const startBtn = $('#start-qr');
-	const rut = $('#rut');
-	const serial = $('#serial');
 	const resultDiv = $('#result');
 	const video = $('#video') as HTMLVideoElement;
 	const canvas = $('#canvas') as HTMLCanvasElement;
 	const ctx = canvas.getContext('2d');
+	const loader = $('#loader');
+	const loaderText = loader?.querySelector('#loader-msg');
+	
 
-
-	function handleResult(code: any) {
+	function renderResult(entries: { [key in keyof ScanResult]: string }) {
 		if (resultDiv) {
 			while (resultDiv.firstChild) {
 				resultDiv.removeChild(resultDiv.firstChild);
 			}
-			const url = new URL(code.data);
-			const params = new URLSearchParams(url.search);
-			for (const [key, value] of params.entries()) {
+			for (const key in entries) {
 				const containerElement = document.createElement('p');
 				const keyElement = document.createElement('span');
 				const valueElement = document.createElement('span');
 				valueElement.classList.add('font-bold');
 				keyElement.innerText = key + ': ';
-				valueElement.innerText = value;
+				valueElement.innerText = entries[key as keyof ScanResult];
 				containerElement.appendChild(keyElement);
 				containerElement.appendChild(valueElement);
 				resultDiv.appendChild(containerElement);
 				resultDiv.classList.remove('hidden');
 				video.classList.add('hidden');
 			}
+		}
+	}
+
+	async function handleResult(code: any) {
+		
+		const visitor = decodeUrl(code.data);
+		console.log('QR data: ',visitor);
+
+		
+
+		try {
+			const response =  await saveResults(resultData);
+			if (response.status === 200) {
+				console.log('Results saved: ', response);
+				renderResult(resultData);
+			}
+		} catch (error) {
+			showAlert('Error saving results', 'error');
+			console.error('Error saving results: ', error);
 		}
 	}
 
@@ -67,6 +88,7 @@ import Layout from '../../layouts/Layout.astro';
 			// @ts-ignore
 			const code = jsQR(imgData.data, imgData.width, imgData.height);
 			if (code && resultDiv) {
+				console.log('QR data: ',code);	
 				handleResult(code);
 				//resultDiv.innerText = `QR Code Result: ${code.data}`;
 				if (video.srcObject) {

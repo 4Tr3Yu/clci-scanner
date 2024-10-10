@@ -1,0 +1,32 @@
+---
+import Layout from "../../../layouts/Layout.astro"
+import MainForm from "../../../components/auth/MainForm.astro";
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (accessToken && refreshToken) {
+  return redirect("/dashboard");
+}
+---
+<Layout title="CLCI Scanner - Login" description="">
+    <div class="">
+      <h2 class="text-2xl font-bold mb-4 text-emerald-200">Sign in</h2>
+      <MainForm  action="/api/auth/signin" method="post">
+          <input class="border border-emerald-500 p-2 px-4 w-full mb-4 bg-black/20 rounded-full" type="email" name="email" id="email" required placeholder="Email..." autocomplete="email" />
+          <input class="border border-emerald-500 p-2 px-4 w-full mb-4 bg-black/20 rounded-full" type="password" name="password" id="password" placeholder="Password" />
+          <button id="login-submit" class="hover:border hover:border-emerald-500 p-2 px-4 text-emerald-300 hover:scale-105 bg-emerald-950 rounded-full min-w-64" type="submit">Ingresar</button>
+      </MainForm>
+    </div>
+</Layout>
+<script>
+    const button = document.querySelector("#login-submit"); 
+    if (button) {
+      button.addEventListener("click", () => {
+          const loader = document.querySelector("#loader");
+          if (loader) loader.classList.remove("hidden");         
+      }); 
+    }
+</script>

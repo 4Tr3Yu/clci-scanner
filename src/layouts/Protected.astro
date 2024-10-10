@@ -1,0 +1,53 @@
+---
+import "@fontsource-variable/raleway";
+import Layout from "./Layout.astro";
+import { supabase } from "../lib/supabase";
+
+const accessToken = Astro.cookies.get("sb-access-token");
+const refreshToken = Astro.cookies.get("sb-refresh-token");
+
+console.log(accessToken, refreshToken);
+
+if (!accessToken || !refreshToken) {
+  return Astro.redirect("/auth/signin");
+}
+
+let session;
+try {
+  session = await supabase.auth.setSession({
+    refresh_token: refreshToken.value,
+    access_token: accessToken.value,
+  });
+  if (session.error) {
+    Astro.cookies.delete("sb-access-token", {
+      path: "/",
+    });
+    Astro.cookies.delete("sb-refresh-token", {
+      path: "/",
+    });
+    return Astro.redirect("/auth/signin");
+  }
+} catch (error) {
+  Astro.cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  Astro.cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+  return Astro.redirect("/auth/signin");
+}
+
+interface Props {
+	title: string;
+	description: string;
+}
+
+const email = session.data.user?.email;
+const { title, description } = Astro.props;
+---
+<Layout title={title} description={description}>
+	<form slot="header" action="/api/auth/signout">
+		<button class="bg-emerald-950/75 border border-emerald-500 text-emerald-500 text-xs hover:scale-105 duration-300 ease-in-out px-4 py-2 rounded-full" type="submit">Sign out</button>
+	</form>
+	<slot/>
+</Layout>
