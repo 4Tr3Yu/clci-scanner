@@ -14,7 +14,7 @@ if (accessToken && refreshToken) {
 <Layout title="CLCI Scanner - Login" description="">
     <div class="">
       <h2 class="text-2xl font-bold mb-4 text-emerald-200">Sign in</h2>
-      <MainForm  action="/api/auth/signin" method="post">
+      <MainForm  action="/api/auth/signin" method="post" id="login-form">
           <input class="border border-emerald-500 p-2 px-4 w-full mb-4 bg-black/20 rounded-full" type="email" name="email" id="email" required placeholder="Email..." autocomplete="email" />
           <input class="border border-emerald-500 p-2 px-4 w-full mb-4 bg-black/20 rounded-full" type="password" name="password" id="password" placeholder="Password" />
           <button id="login-submit" class="hover:border hover:border-emerald-500 p-2 px-4 text-emerald-300 hover:scale-105 bg-emerald-950 rounded-full min-w-64" type="submit">Ingresar</button>

@@ -2,38 +2,44 @@
 interface Props {
 	alertType: string;
 	message: string;
+	id: string
 }
 
-const { alertType, message } = Astro.props;
+const { alertType, message, id } = Astro.props;
 ---
-<div class={`w-full alert-box border bg-gradient-to-bl px-3 py-2 rounded-lg relative alert-box--${alertType}`} >
+<div class={`w-full alert-box border bg-gradient-to-bl px-3 py-2 rounded-lg relative mb-4 alert-box--${alertType}`} >
 
-	<h2 class="text-xs font-bold capitalize">{{ alertType }}</h2>
-	<p class="font-thin">{{ message }}</p>
-	<button @click="$emit('close')"
+	<h2 class="text-xs font-bold capitalize">{ alertType }</h2>
+	<p class="font-thin">{ message }</p>
+	<button id={`close-alert-${id}`}
 		class="absolute right-0 top-0 h-full w-6 flex items-center justify-center border-l bg-white/15 rounded-r-lg">
-		<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-			stroke="currentColor">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-		</svg>
+		x
 	</button>
 </div>
+
+<script define:vars={{id}}>
+	const closeBtn = document.getElementById(`close-alert-${id}`);
+	closeBtn.addEventListener('click', () => {
+		closeBtn.parentElement.remove();
+	});
+</script>
+
 <style scoped lang="scss">
 	.alert-box {
 		&--error {
-			@apply border-rose-400 from-rose-400/75 to-transparent text-rose-200;
+			@apply border-rose-400 from-rose-950 to-rose-800 text-rose-200;
 		}
 	
 		&--success {
-			@apply border-emerald-400 from-emerald-400/75 to-transparent text-emerald-200;
+			@apply border-emerald-400 from-emerald-950 to-emerald-800 text-emerald-200;
 		}
 	
 		&--warning {
-			@apply border-amber-400 from-amber-400/75 to-transparent text-amber-200;
+			@apply border-amber-400 from-amber-950 to-amber-800 text-amber-200;
 		}
 	
 		&--info {
-			@apply border-sky-400 from-sky-400/75 to-transparent text-sky-200;
+			@apply border-sky-400 from-sky-950 to-sky-800 text-sky-200;
 	
 		}
 	

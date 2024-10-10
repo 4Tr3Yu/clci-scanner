@@ -1,13 +1,45 @@
 ---
 import MainForm from "../auth/MainForm.astro";
+interface Props {
+	action?: string,
+	method?: string,
+	id: string
+}
+const { action, method, id } = Astro.props;
 ---
-<MainForm action="" method="">
+<MainForm action="" method="" id={id}>
 	<input 
 		class="border border-emerald-500 p-2 px-4 w-full mb-4 bg-black/20 rounded-full" 
-		type="email" 
-		name="email" 
-		id="email" 
-		required 
-		placeholder="Email..." 
-		autocomplete="email" />
+		type="text" 
+		name="car" 
+		id="car" 
+		placeholder="Patente..." />
+	<input
+		class="border border-emerald-500 p-2 px-4 w-full mb-4 bg-black/20 rounded-full" 
+		type="text" 
+		name="category" 
+		id="category" 
+		placeholder="Color de auto..." />
+	<label for="date" class="text-emerald-300 text-left block">Incidentes (opcional)</label>
+	<textarea 
+		class="border border-emerald-500 p-2 px-4 w-full mb-4 bg-black/20 rounded-lg" 
+		name="incidentes" 
+		id="incidents"  
+		placeholder="Incidentes..."  >
+	</textarea>
+	<label for="date" class="text-emerald-300 text-left block">Nota 1 (opcional)</label>
+	<textarea 
+		class="border border-emerald-500 p-2 px-4 w-full mb-4 bg-black/20 rounded-lg" 
+		name="note1" 
+		id="note1"  
+		placeholder="Nota 1..."  >
+	</textarea>
+	<label for="date" class="text-emerald-300 text-left block">Nota 2 (opcional)</label>
+	<textarea 
+		class="border border-emerald-500 p-2 px-4 w-full mb-4 bg-black/20 rounded-lg" 
+		name="note2" 
+		id="note2"  
+		placeholder="Nota 2..."  >
+	</textarea>
+	<button id="scanner-submit" class="hover:border hover:border-emerald-500 p-2 px-4 text-emerald-300 hover:scale-105 bg-emerald-950 rounded-full min-w-64" type="submit">Guardar Datos</button>
 </MainForm>

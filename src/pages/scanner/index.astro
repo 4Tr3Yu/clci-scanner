@@ -1,34 +1,69 @@
 ---
 import Protected from '../../layouts/Protected.astro';
+import Form from '../../components/scanner/Form.astro';
+import Alert from '../../components/Alert.astro';
 ---
-<Protected title="CLCI Scanner - jsqr" description="Scanner for Chilean documents">
-	<div class="w-full  flex justify-center flex-col items-center pt-16">
-		<div class="border border-emerald-900 mb-4 min-h-64 min-w-64">
-			<video id="video" class="w-auto h-auto" autoplay></video>
+<Protected title="Scanner - CLCI Scanner" description="Scanner for Chilean documents">
+	<section class="w-full pt-16">
+		<Alert alertType="warning" message="Porfavor recuerda que tu navegador deber tener permisos para usar la camara" id="warn-scanner"/>
+		<div class="scanner flex justify-center flex-col items-center">
+			<div class="border border-emerald-900 mb-4 min-h-64 min-w-64">
+				<video id="video" class="w-auto h-auto" autoplay></video>
+			</div>
+			<canvas id="canvas" class="hidden"></canvas>
+			<button type="button"  class="text-emerald-500 px-4 py-2 border border-emerald-500 bg-emerald-950/75 rounded-full mb-4 hover:scale-105 duration-300 ease-in-out" id="start-qr">Start Scanning</button>
 		</div>
-		<canvas id="canvas" class="hidden"></canvas>
-		<button type="button"  class="text-emerald-500 px-4 py-2 border border-emerald-500 bg-emerald-950/75 rounded-full mb-4 hover:scale-105 duration-300 ease-in-out" id="start-qr">Start Scanning</button>
-		<div class="hidden text-center" id="result">
-
+		<div class="w-full text-center flex gap-x-4" id="step-2">
+			<div class="w-1/2">
+				<h2 class="text-gradient text-left text-pretty w-full mb-4">Favor completa los datos para el registro de: </h2>
+				<div id="result" class="hidden text-left"></div>
+			</div>
+			<div class="w-1/2">
+				<Form id="scanner-form"/>
+			</div>
 		</div>
-	</div>
+	</section>
 </Protected>
 <script src="/jsQR.js" is:inline></script>
 <script>
 	import type { ScanResult } from "../../lib/types";
-	import { saveLog } from "../../lib/visitor-logs";
-	import { decodeUrl } from "../../lib/scanner";
+	import { decodeUrl, formatSaveLogRequest ,saveLog } from "../../lib/scanner";
 	
 	const $ = (el: string) => document.querySelector(el); 
 
 	const startBtn = $('#start-qr');
+	const step2 = $('#step-2');
+	const scanner = $('.scanner');
 	const resultDiv = $('#result');
 	const video = $('#video') as HTMLVideoElement;
 	const canvas = $('#canvas') as HTMLCanvasElement;
+	const form = $('#scanner-form') as HTMLFormElement;
 	const ctx = canvas.getContext('2d');
 	const loader = $('#loader');
-	const loaderText = loader?.querySelector('#loader-msg');
+	const loaderText = loader?.querySelector('#loader-msg') as HTMLParagraphElement
+
+	let visitor: ScanResult | null = null;
 	
+	form?.addEventListener('submit', async (e) => {
+		loader?.classList.remove('hidden');
+		loaderText.innerText = 'Guardando datos...';
+		e.preventDefault();
+		const formData = new FormData(form);
+		let log = Object.fromEntries(formData.entries());
+		const visitorLog = formatSaveLogRequest(visitor, {
+			car: log.car as string,
+			category: log.category as string,
+			incidentes: log.incidentes as string,
+			note1: log.note1 as string,
+			note2: log.note2 as string
+		});
+		try {
+			const response = await saveLog(visitorLog);
+			loaderText.innerText = 'Datos guardados correctamente';
+		} catch (error) {
+			loaderText.innerText = 'Error al guardar los datos';
+		}
+	});
 
 	function renderResult(entries: { [key in keyof ScanResult]: string }) {
 		if (resultDiv) {
@@ -39,7 +74,7 @@ import Protected from '../../layouts/Protected.astro';
 				const containerElement = document.createElement('p');
 				const keyElement = document.createElement('span');
 				const valueElement = document.createElement('span');
-				valueElement.classList.add('font-bold');
+				valueElement.classList.add('font-bold', 'text-2xl', 'mb-2');
 				keyElement.innerText = key + ': ';
 				valueElement.innerText = entries[key as keyof ScanResult];
 				containerElement.appendChild(keyElement);
@@ -52,26 +87,17 @@ import Protected from '../../layouts/Protected.astro';
 	}
 
 	async function handleResult(code: any) {
-		
-		const visitor = decodeUrl(code.data);
-		console.log('QR data: ',visitor);
-
-		
-
-		try {
-			const response =  await saveResults(resultData);
-			if (response.status === 200) {
-				console.log('Results saved: ', response);
-				renderResult(resultData);
-			}
-		} catch (error) {
-			showAlert('Error saving results', 'error');
-			console.error('Error saving results: ', error);
-		}
+		visitor = decodeUrl(code.data);
+		scanner?.classList.add('hidden');
+		step2?.classList.remove('hidden');	
+		// fecth data from scrapper
+		renderResult(visitor);	
 	}
 
 	async function startStream() {
-		video.classList.remove('hidden');
+		scanner?.classList.remove('hidden');
+		visitor = null;
+		startBtn?.classList.add('hidden');
 		const stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode: "environment" } });
 		video.srcObject = stream;
 		video.setAttribute("playsinline", "true");
